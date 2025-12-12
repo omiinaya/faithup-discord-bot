@@ -147,6 +147,12 @@ class MyCog(commands.Cog):
             await ctx.send(t('balding_percent', lang='en', user=ctx.author.mention, percent=percent))
 
     @commands.command()
+    async def source(self, ctx: commands.Context) -> None:
+        """Returns the GitHub source code link."""
+        logger.info(f"source called by {ctx.author}")
+        await ctx.send(f"{ctx.author.mention}, here's the source code: https://github.com/omiinaya/faithup-discord-bot")
+
+    @commands.command()
     async def commands(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Lists all available commands and their descriptions."""
         logger.info(f"commands called by {ctx.author}")
@@ -161,6 +167,7 @@ class MyCog(commands.Cog):
             ("coinflip", t('desc_coinflip', lang=lang)),
             ("decide", t('desc_decide', lang=lang)),
             ("balding", t('desc_balding', lang=lang)),
+            ("source", t('desc_source', lang=lang)),
         ]
         msg = "**Available Commands:**\n" + "\n".join([f"`{name}`: {desc}" for name, desc in cmds])
         await ctx.send(msg)

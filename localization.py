@@ -43,7 +43,8 @@ LOCALES = {
         'desc_slots': 'Play a slot machine game with Discord emojis.',
         'desc_coinflip': 'Flip a coin and return heads or tails.',
         'desc_decide': 'Randomly decide yes or no.',
-        'desc_balding': 'Returns a random balding percentage.'
+        'desc_balding': 'Returns a random balding percentage.',
+        'desc_source': 'Returns the GitHub source code link.'
     },
     'es': {
         'pong': '¡Pong!',
@@ -89,6 +90,7 @@ LOCALES = {
         'desc_coinflip': 'Lanza una moneda y devuelve cara o cruz.',
         'desc_decide': 'Decide aleatoriamente sí o no.',
         'desc_balding': 'Devuelve un porcentaje de calvicie aleatorio.',
+        'desc_source': 'Devuelve el enlace al código fuente en GitHub.',
     }
 }
 
