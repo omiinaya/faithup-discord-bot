@@ -106,32 +106,6 @@ class MyCog(commands.Cog):
             await ctx.send(t('unexpected_error', lang='en', error=e))
     
     @commands.command()
-    async def weather(self, ctx):
-        """Returns the current weather type for Eastern Americas and time until the next weather type."""
-        url = os.getenv('WEATHER_API')
-        data = fetch_json(url)
-        if data:
-            eastern_america_data = data[0]['data']['Eastern Americas']
-            current_weather, time_until_next, next_weather = self.get_current_weather(eastern_america_data)
-            message = f"Current weather is '{current_weather}'. Time until '{next_weather}' is {time_until_next}."
-        else:
-            message = "Failed to retrieve data from the API."
-        await ctx.send(message)
-
-    @commands.command()
-    async def timeofday(self, ctx):
-        """Returns the current time of day for Eastern Americas and time until the next one."""
-        url = os.getenv('DAYNIGHT_API')
-        data = fetch_json(url)
-        if data:
-            eastern_america_data = data[0]['data']['Eastern Americas']
-            current_time_of_day, time_until_next, next_time_of_day = self.get_current_time_of_day(eastern_america_data)
-            message = f"Current time of day is '{current_time_of_day}'. Time until '{next_time_of_day}' is {time_until_next}."
-        else:
-            message = "Failed to retrieve data from the API."
-        await ctx.send(message)
-
-    @commands.command()
     async def measure(self, ctx):
         """Responds randomly with 1 - 14 inches."""
         measurement = random.randint(1, 14)
@@ -142,10 +116,9 @@ class MyCog(commands.Cog):
         """Sends a secret message to the specified user."""
         logger.info(f"secret called by {ctx.author} targeting {target} with message: {message}")
         try:
-            valid, error = is_valid_member(ctx, target)
-            if not valid:
-                await ctx.send(error)
-                return
+            # Allow sending messages to self for testing
+            if target == ctx.author:
+                await ctx.send("Sending test message to yourself...")
             
             await target.send(message)
             await ctx.send(t('secret_check_dm', lang='en', user=ctx.author.mention))
