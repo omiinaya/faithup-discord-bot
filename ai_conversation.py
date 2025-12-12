@@ -2,6 +2,7 @@
 import os
 import logging
 from typing import Dict, List
+from openai import OpenAI
 
 logger = logging.getLogger("red.cogfaithup.ai_conversation")
 
@@ -10,13 +11,23 @@ class AIConversationHandler:
     """Handles AI conversations with users using NVIDIA API."""
     
     def __init__(self):
-        self.client = OpenAI(
-            base_url="https://integrate.api.nvidia.com/v1",
-            api_key=os.getenv("NVIDIA_API_KEY")
-        )
+        self._client = None
         self.model = "deepseek-ai/deepseek-v3.1-terminus"
         # user_id -> message history
         self.conversations: Dict[int, List[Dict[str, str]]] = {}
+    
+    @property
+    def client(self):
+        """Lazy initialization of OpenAI client."""
+        if self._client is None:
+            api_key = os.getenv("NVIDIA_API_KEY")
+            if not api_key:
+                raise ValueError("NVIDIA_API_KEY environment variable is not set")
+            self._client = OpenAI(
+                base_url="https://integrate.api.nvidia.com/v1",
+                api_key=api_key
+            )
+        return self._client
         
     def _get_conversation_history(self, user_id: int) -> List[Dict[str, str]]:
         """Get or create conversation history for a user."""
@@ -27,9 +38,10 @@ class AIConversationHandler:
                     "role": "system", 
                     "content": (
                         "You are a helpful AI assistant in a Discord server. "
-                        "Be friendly, engaging, and keep responses concise but "
-                        "meaningful. You can have conversations about various "
-                        "topics but maintain appropriate discord server etiquette."
+                        "Be friendly, engaging, and keep responses concise "
+                        "but meaningful. You can have conversations about "
+                        "various topics but maintain appropriate discord "
+                        "server etiquette."
                     )
                 }
             ]
