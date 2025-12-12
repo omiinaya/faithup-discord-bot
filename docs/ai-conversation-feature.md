@@ -13,6 +13,8 @@ The bot now supports AI-powered conversations when users mention it (`@botname`)
 - **Memory Management**: Users can clear their conversation history with the `clear_chat` command
 - **Typing Indicators**: Shows typing indicator while generating responses
 - **Message Length Handling**: Automatically truncates long responses for Discord limits
+- **Command Recognition**: AI intelligently recognizes when users ask about commands and provides execution instructions
+- **Natural Language Understanding**: Understands various ways users might ask for commands (e.g., "verse of the day", "roll dice", "flip coin")
 
 ## Configuration
 
@@ -40,6 +42,18 @@ Simply mention the bot in any message:
 @FaithUpBot Hello! How are you doing today?
 ```
 
+### Command Recognition
+
+The AI can recognize when you're asking about available commands and provide helpful instructions:
+
+```
+@FaithUpBot What is the verse of the day?
+@FaithUpBot I want to roll some dice
+@FaithUpBot How do I play rock paper scissors?
+```
+
+The bot will respond with instructions on how to use the relevant commands.
+
 ### Clearing Conversation History
 
 Use the `clear_chat` command to reset your conversation memory:
@@ -62,6 +76,8 @@ Use the `clear_chat` command to reset your conversation memory:
 
 - **AIConversationHandler**: Main class handling AI conversations and memory
 - **Memory Management**: Each user gets their own conversation history (max 10 messages)
+- **Command Recognition**: Natural language processing to detect command requests
+- **Command Mapping**: Maps various phrases to specific bot commands
 - **Error Handling**: Graceful error handling with user-friendly messages
 - **Performance**: Non-streaming API calls for simplicity and reliability
 
