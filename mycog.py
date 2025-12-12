@@ -15,12 +15,6 @@ from .localization import t
 load_dotenv()
 logger = logging.getLogger("red.coghedrin.mycog")
 
-# Check for required environment variables at startup
-REQUIRED_ENV_VARS = ["SAMPLE_API", "WEATHER_API", "DAYNIGHT_API"]
-for var in REQUIRED_ENV_VARS:
-    if not os.getenv(var):
-        logger.warning(f"Environment variable {var} is not set. Some commands may not work.")
-
 class MyCog(commands.Cog):
     """My custom cog with fun commands and best practices."""
 
@@ -73,38 +67,6 @@ class MyCog(commands.Cog):
             logger.error(f"Error in rps command: {e}")
             await ctx.send(f"Error: {e}")
 
-    @commands.command()
-    @commands.cooldown(1, 10, commands.BucketType.user)
-    async def apicall(self, ctx: commands.Context, url: Optional[str] = None) -> None:
-        """Makes an API call and returns the response. Optionally takes a URL argument. (10s cooldown per user)"""
-        logger.info(f"apicall called by {ctx.author} with url={url}")
-        api_url = url or os.getenv('SAMPLE_API')
-        if not api_url or not api_url.startswith(('http://', 'https://')):
-            await ctx.send(t('api_url_invalid', lang='en'))
-            return
-        try:
-            response = requests.get(api_url, timeout=10)
-            logger.info(f"API call to {api_url} returned status {response.status_code}")
-            if response.status_code == 200:
-                content_type = response.headers.get('Content-Type', '')
-                if 'application/json' in content_type:
-                    data = response.json()
-                    message = t('api_response', lang='en', data=data)
-                else:
-                    data = response.text
-                    message = t('api_response', lang='en', data=data)
-                if len(message) > 1800:
-                    message = message[:1800] + '... (truncated)'
-                await ctx.send(message)
-            else:
-                await ctx.send(t('api_failed', lang='en', status=response.status_code))
-        except requests.RequestException as e:
-            logger.error(f"API call failed: {e}")
-            await ctx.send(t('api_failed_exception', lang='en', error=e))
-        except Exception as e:
-            logger.error(f"Unexpected error in apicall: {e}")
-            await ctx.send(t('unexpected_error', lang='en', error=e))
-    
     @commands.command()
     async def measure(self, ctx):
         """Responds randomly with 1 - 14 inches."""
@@ -212,7 +174,6 @@ class MyCog(commands.Cog):
             ("roll", t('desc_roll', lang=lang)),
             ("dice", t('desc_dice', lang=lang)),
             ("rps", t('desc_rps', lang=lang)),
-            ("apicall", t('desc_apicall', lang=lang)),
             ("measure", t('desc_measure', lang=lang)),
             ("secret", t('desc_secret', lang=lang)),
             ("roulette", t('desc_roulette', lang=lang)),
