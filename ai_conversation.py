@@ -1,6 +1,7 @@
 """AI Conversation handler for Discord bot using NVIDIA API."""
 import os
 import logging
+import random
 from typing import Dict, List, Optional
 from openai import OpenAI
 
