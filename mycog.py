@@ -30,13 +30,6 @@ class MyCog(commands.Cog):
 
     @commands.command()
     @commands.cooldown(1, 5, commands.BucketType.user)
-    async def pinghedrin(self, ctx: commands.Context, lang: str = 'en') -> None:
-        """Responds with Pong! for health check. (5s cooldown per user, supports localization)"""
-        logger.info(f"pinghedrin called by {ctx.author}")
-        await ctx.send(t('pong', lang=lang))
-
-    @commands.command()
-    @commands.cooldown(1, 5, commands.BucketType.user)
     async def roll(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Roll a random number from 1-100. (5s cooldown per user, supports localization)"""
         logger.info(f"roll called by {ctx.author}")
@@ -139,99 +132,6 @@ class MyCog(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
-    async def when(self, ctx, condition: str, lang: str = 'en'):
-        """Tells how long until the specified condition (day, night, normal, rain) or if it's already that condition. (supports localization)"""
-        condition = condition.lower()
-        if condition not in ["day", "night", "rain"]:
-            await ctx.send(t('invalid_condition', lang=lang))
-            return
-        if condition in ["day", "night"]:
-            url = os.getenv('DAYNIGHT_API')
-            data = fetch_json(url)
-            if data:
-                eastern_america_data = data[0]['data']['Eastern Americas']
-                current_time_of_day, time_until_next, next_time_of_day = self.get_current_time_of_day(eastern_america_data)
-                if current_time_of_day.lower() == condition:
-                    message = f"It's currently '{condition}' already."
-                else:
-                    message = f"Time until '{condition}' is {time_until_next}."
-            else:
-                message = "Failed to retrieve data from the API."
-        else:
-            url = os.getenv('WEATHER_API')
-            data = fetch_json(url)
-            if data:
-                eastern_america_data = data[0]['data']['Eastern Americas']
-                current_weather, time_until_next, next_weather = self.get_current_weather(eastern_america_data)
-                if current_weather.lower() == condition:
-                    message = f"It's currently '{condition}'."
-                else:
-                    message = f"Time until '{condition}' is {time_until_next}."
-            else:
-                message = "Failed to retrieve data from the API."
-        await ctx.send(message)
-
-    def get_current_weather(self, data):
-        """Determines the current weather type and time until the next weather type based on the provided data."""
-        current_time = datetime.now().timestamp()
-        current_weather = "Unknown"
-        time_until_next = "Unknown"
-        next_weather = "Unknown"
-        
-        for i, forecast in enumerate(data):
-            forecast_time = forecast['ts'] // 1000
-            if forecast_time <= current_time:
-                current_weather = forecast['condition'].replace("EWeatherType::", "")
-                if i + 1 < len(data):
-                    next_forecast_time = data[i + 1]['ts'] // 1000
-                    next_weather = data[i + 1]['condition'].replace("EWeatherType::", "")
-                    time_until_next_seconds = next_forecast_time - current_time
-                    hours, remainder = divmod(time_until_next_seconds, 3600)
-                    minutes = remainder // 60
-                    if hours > 0:
-                        time_until_next = f"{int(hours)} hours and {int(minutes)} minutes"
-                    elif minutes > 0:
-                        time_until_next = f"{int(minutes)} minutes"
-                    else:
-                        time_until_next = f"{int(time_until_next_seconds)} seconds"
-                else:
-                    time_until_next = "N/A"
-            else:
-                break
-        
-        return current_weather, time_until_next, next_weather
-
-    def get_current_time_of_day(self, data):
-        """Determines the current time of day and time until the next one based on the provided data."""
-        current_time = datetime.now().timestamp()
-        current_time_of_day = "Unknown"
-        time_until_next = "Unknown"
-        next_time_of_day = "Unknown"
-        
-        for i, forecast in enumerate(data):
-            forecast_time = forecast['ts'] // 1000
-            if forecast_time <= current_time:
-                current_time_of_day = forecast['condition']
-                if i + 1 < len(data):
-                    next_forecast_time = data[i + 1]['ts'] // 1000
-                    next_time_of_day = data[i + 1]['condition']
-                    time_until_next_seconds = next_forecast_time - current_time
-                    hours, remainder = divmod(time_until_next_seconds, 3600)
-                    minutes = remainder // 60
-                    if hours > 0:
-                        time_until_next = f"{int(hours)} hours and {int(minutes)} minutes"
-                    elif minutes > 0:
-                        time_until_next = f"{int(minutes)} minutes"
-                    else:
-                        time_until_next = f"{int(time_until_next_seconds)} seconds"
-                else:
-                    time_until_next = "N/A"
-            else:
-                break
-        
-        return current_time_of_day, time_until_next, next_time_of_day
-    
-    @commands.command()
     async def measure(self, ctx):
         """Responds randomly with 1 - 14 inches."""
         measurement = random.randint(1, 14)
@@ -331,14 +231,10 @@ class MyCog(commands.Cog):
         """Lists all available commands and their descriptions."""
         logger.info(f"commands called by {ctx.author}")
         cmds = [
-            ("pinghedrin", t('desc_pinghedrin', lang=lang)),
             ("roll", t('desc_roll', lang=lang)),
             ("dice", t('desc_dice', lang=lang)),
             ("rps", t('desc_rps', lang=lang)),
             ("apicall", t('desc_apicall', lang=lang)),
-            ("weather", t('desc_weather', lang=lang)),
-            ("timeofday", t('desc_timeofday', lang=lang)),
-            ("when", t('desc_when', lang=lang)),
             ("measure", t('desc_measure', lang=lang)),
             ("secret", t('desc_secret', lang=lang)),
             ("roulette", t('desc_roulette', lang=lang)),
