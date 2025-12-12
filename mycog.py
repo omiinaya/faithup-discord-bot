@@ -194,10 +194,9 @@ class MyCog(commands.Cog):
             
             # Format the message
             message = (
-                f"📖 **Verse of the Day** (Day {verse_data['day']})\n"
+                f"📖 **Verse of the Day**\n"
                 f"**{verse_data['human_reference']}**\n"
-                f"{verse_data['verse_text']}\n"
-                f"*Powered by YouVersion Bible*"
+                f"{verse_data['verse_text']}"
             )
             
             await ctx.send(message)
