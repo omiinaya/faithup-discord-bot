@@ -14,6 +14,7 @@ The bot now supports AI-powered conversations when users mention it (`@botname`)
 - **Typing Indicators**: Shows typing indicator while generating responses
 - **Message Length Handling**: Automatically truncates long responses for Discord limits
 - **Command Recognition**: AI intelligently recognizes when users ask about commands and provides execution instructions
+- **Command Execution**: AI can automatically execute commands when users ask for them
 - **Natural Language Understanding**: Understands various ways users might ask for commands (e.g., "verse of the day", "roll dice", "flip coin")
 
 ## Configuration
@@ -42,17 +43,25 @@ Simply mention the bot in any message:
 @FaithUpBot Hello! How are you doing today?
 ```
 
-### Command Recognition
+### Command Execution
 
-The AI can recognize when you're asking about available commands and provide helpful instructions:
+The AI can automatically execute commands when you ask for them:
 
 ```
 @FaithUpBot What is the verse of the day?
+→ The bot will fetch and display today's Bible verse
+
 @FaithUpBot I want to roll some dice
-@FaithUpBot How do I play rock paper scissors?
+→ The bot will roll a random number and show the result
+
+@FaithUpBot Flip a coin for me
+→ The bot will flip a coin and show heads or tails
+
+@FaithUpBot Play slots
+→ The bot will run the slot machine game
 ```
 
-The bot will respond with instructions on how to use the relevant commands.
+The bot recognizes natural language requests and executes the appropriate commands automatically.
 
 ### Clearing Conversation History
 
@@ -77,6 +86,7 @@ Use the `clear_chat` command to reset your conversation memory:
 - **AIConversationHandler**: Main class handling AI conversations and memory
 - **Memory Management**: Each user gets their own conversation history (max 10 messages)
 - **Command Recognition**: Natural language processing to detect command requests
+- **Command Execution**: Direct execution of command logic when requested
 - **Command Mapping**: Maps various phrases to specific bot commands
 - **Error Handling**: Graceful error handling with user-friendly messages
 - **Performance**: Non-streaming API calls for simplicity and reliability

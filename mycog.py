@@ -238,6 +238,11 @@ class MyCog(commands.Cog):
                 )
                 return
             
+            # Check if this is a command request that we can execute
+            command_result = await self._try_execute_command(message, content)
+            if command_result:
+                return  # Command was executed, no need for AI response
+            
             # Show typing indicator
             async with message.channel.typing():
                 # Generate AI response
@@ -256,6 +261,126 @@ class MyCog(commands.Cog):
             await message.channel.send(
                 "Sorry, I encountered an error processing your message."
             )
+    
+    async def _try_execute_command(self, message: discord.Message, content: str) -> bool:
+        """Try to execute a command based on natural language request."""
+        # Map natural language requests to direct command execution
+        command_mapping = {
+            'verse of the day': self._execute_votd_direct,
+            'bible verse': self._execute_votd_direct,
+            'daily verse': self._execute_votd_direct,
+            'roll dice': self._execute_roll_direct,
+            'dice roll': self._execute_roll_direct,
+            'coin flip': self._execute_coinflip_direct,
+            'flip coin': self._execute_coinflip_direct,
+            'slot machine': self._execute_slots_direct,
+            'russian roulette': self._execute_roulette_direct,
+            'random number': self._execute_roll_direct,
+            'balding percentage': self._execute_balding_direct,
+            'source code': self._execute_source_direct,
+        }
+        
+        content_lower = content.lower()
+        
+        for phrase, command_func in command_mapping.items():
+            if phrase in content_lower:
+                try:
+                    # If this is RPS, we need special handling
+                    if 'rock paper scissors' in content_lower:
+                        await message.channel.send(
+                            f"{message.author.mention}, to play Rock-Paper-Scissors, "
+                            f"use `!rps @username` to challenge someone!"
+                        )
+                        return True
+                    
+                    # Execute the command directly
+                    await command_func(message)
+                    return True
+                    
+                except Exception as e:
+                    logger.error(f"Error executing command for '{phrase}': {e}")
+                    # Fallback to suggestion
+                    command_name = phrase.split()[-1] if ' ' in phrase else phrase
+                    await message.channel.send(
+                        f"{message.author.mention}, you can use `!{command_name}` for that!"
+                    )
+                    return True
+        
+        return False
+    
+    async def _execute_votd_direct(self, message: discord.Message) -> None:
+        """Execute votd command directly."""
+        try:
+            from .youversion.client import YouVersionClient
+            client = YouVersionClient()
+            verse_data = client.get_formatted_verse_of_the_day(None)
+            
+            message_text = (
+                f"📖 **Verse of the Day**\n"
+                f"**{verse_data['human_reference']}**\n"
+                f"{verse_data['verse_text']}"
+            )
+            
+            await message.channel.send(message_text)
+            
+        except Exception as e:
+            logger.error(f"Error fetching verse of the day: {e}")
+            await message.channel.send(
+                f"{message.author.mention}, I couldn't fetch the verse of the day. "
+                "Please try again later."
+            )
+    
+    async def _execute_roll_direct(self, message: discord.Message) -> None:
+        """Execute roll command directly."""
+        random_number = random.randint(1, 100)
+        message_text = f"{message.author.mention}, you rolled a {random_number}!"
+        await message.channel.send(message_text)
+    
+    async def _execute_coinflip_direct(self, message: discord.Message) -> None:
+        """Execute coinflip command directly."""
+        outcome = random.choice(['heads', 'tails'])
+        message_text = f"{message.author.mention}, the coin landed on {outcome}!"
+        await message.channel.send(message_text)
+    
+    async def _execute_slots_direct(self, message: discord.Message) -> None:
+        """Execute slots command directly."""
+        emojis = [":cherries:", ":lemon:", ":strawberry:",
+                  ":grapes:", ":seven:", ":bell:"]
+        slot1 = random.choice(emojis)
+        slot2 = random.choice(emojis)
+        slot3 = random.choice(emojis)
+        result = f"{slot1} | {slot2} | {slot3}"
+        if slot1 == slot2 == slot3:
+            message_text = f"{result}\n🎉 Jackpot! {message.author.mention} wins!"
+        else:
+            message_text = f"{result}\nBetter luck next time, {message.author.mention}!"
+        await message.channel.send(message_text)
+    
+    async def _execute_roulette_direct(self, message: discord.Message) -> None:
+        """Execute roulette command directly."""
+        outcome = random.randint(1, 6)
+        if outcome == 6:
+            message_text = f"💥 BANG! {message.author.mention} didn't make it... (rolled {outcome}/6)"
+        else:
+            message_text = f"🔫 Click... {message.author.mention} survives! (rolled {outcome}/6)"
+        await message.channel.send(message_text)
+    
+    async def _execute_balding_direct(self, message: discord.Message) -> None:
+        """Execute balding command directly."""
+        percent = random.randint(0, 100)
+        if percent == 0:
+            message_text = f"{message.author.mention}, you have a full head of hair! 0% balding."
+        else:
+            message_text = f"{message.author.mention}, you are {percent}% balding."
+        await message.channel.send(message_text)
+    
+    async def _execute_source_direct(self, message: discord.Message) -> None:
+        """Execute source command directly."""
+        message_text = (
+            f"{message.author.mention}, here's the source code: "
+            "https://github.com/omiinaya/faithup-discord-bot"
+        )
+        await message.channel.send(message_text)
 
     @commands.command()
     async def clear_chat(self, ctx: commands.Context) -> None:
