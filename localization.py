@@ -44,7 +44,42 @@ LOCALES = {
         'desc_coinflip': 'Flip a coin and return heads or tails.',
         'desc_decide': 'Randomly decide yes or no.',
         'desc_balding': 'Returns a random balding percentage.',
-        'desc_source': 'Returns the GitHub source code link.'
+        'desc_source': 'Returns the GitHub source code link.',
+        'bingbong_positive': [
+            "i guess so...",
+            "i think it's fine...",
+            "if you wanna...",
+            "okay...",
+            "s...sure...",
+            "y...yeah...",
+            "y-yeah, definitely!",
+            "yes!"
+        ],
+        'bingbong_negative': [
+            "d-definitely not...",
+            "don't do it...",
+            "i think that's a bad idea...",
+            "nah...",
+            "no.",
+            "NO!!!!!!",
+            "no no no no no",
+            "n-nuh uh...",
+            "p...please don't..."
+        ],
+        'bingbong_uncertain': [
+            "i dunno",
+            "if i say yes, will you take me with you?",
+            "i'm not comfortable answering that...",
+            "i'm... not sure...",
+            "maaaaaaaaybe",
+            "uh...uhhhhh...",
+            "you should ask your friends for help!"
+        ],
+        'bingbong_irrelevant': [
+            "i miss my wife",
+            "i'm bing bong"
+        ],
+        'desc_bingbong': 'Bing bong responds with one of many possible lines.'
     },
     'es': {
         'pong': '¡Pong!',
@@ -97,4 +132,10 @@ LOCALES = {
 def t(key, lang='en', **kwargs):
     """Translate a key to the given language."""
     template = LOCALES.get(lang, LOCALES['en']).get(key, key)
+    
+    # Handle lists (return them as-is)
+    if isinstance(template, list):
+        return template
+    
+    # Handle strings with formatting
     return template.format(**kwargs)

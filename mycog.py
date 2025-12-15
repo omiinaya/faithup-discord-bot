@@ -400,6 +400,24 @@ class MyCog(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
+    async def bingbong(self, ctx: commands.Context) -> None:
+        """Bing bong responds with one of many possible lines."""
+        logger.info("bingbong called by %s", ctx.author)
+        
+        # Get all response lists
+        positive = t('bingbong_positive', lang='en')
+        negative = t('bingbong_negative', lang='en')
+        uncertain = t('bingbong_uncertain', lang='en')
+        irrelevant = t('bingbong_irrelevant', lang='en')
+        
+        # Combine all response types
+        all_responses = positive + negative + uncertain + irrelevant
+        
+        # Select a random response
+        response = random.choice(all_responses)
+        await ctx.send(response)
+
+    @commands.command()
     async def commands(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Lists all available commands and their descriptions."""
         logger.info("commands called by %s", ctx.author)
@@ -417,6 +435,7 @@ class MyCog(commands.Cog):
             ("votd", "Get the Verse of the Day from YouVersion"),
             ("clear_chat", "Clear your AI conversation history"),
             ("source", t('desc_source', lang=lang)),
+            ("bingbong", t('desc_bingbong', lang=lang)),
         ]
         command_list = "\n".join([f"`{name}`: {desc}" for name, desc in cmds])
         msg = "**Available Commands:**\n" + command_list
