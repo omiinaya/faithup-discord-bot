@@ -400,9 +400,11 @@ class MyCog(commands.Cog):
         await ctx.send(message)
 
     @commands.command()
-    async def bingbong(self, ctx: commands.Context) -> None:
-        """Bing bong responds with one of many possible lines."""
-        logger.info("bingbong called by %s", ctx.author)
+    async def bingbong(self, ctx: commands.Context,
+                       *, question: Optional[str] = None) -> None:
+        """Ask Bing Bong a question and get a random response."""
+        logger.info("bingbong called by %s with question: %s",
+                    ctx.author, question)
         
         # Get all response lists
         positive = t('bingbong_positive', lang='en')
@@ -415,7 +417,15 @@ class MyCog(commands.Cog):
         
         # Select a random response
         response = random.choice(all_responses)
-        await ctx.send(response)
+        
+        # If a question was provided, format the response to acknowledge it
+        if question:
+            message = (f"{ctx.author.mention} asked: \"{question}\"\n"
+                       f"🎤 Bing Bong says: \"{response}\"")
+        else:
+            message = f"{ctx.author.mention}, Bing Bong says: \"{response}\""
+            
+        await ctx.send(message)
 
     @commands.command()
     async def commands(self, ctx: commands.Context, lang: str = 'en') -> None:

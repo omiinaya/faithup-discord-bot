@@ -79,7 +79,7 @@ LOCALES = {
             "i miss my wife",
             "i'm bing bong"
         ],
-        'desc_bingbong': 'Bing bong responds with one of many possible lines.'
+        'desc_bingbong': 'Ask Bing Bong a question and get a random response.'
     },
     'es': {
         'pong': '¡Pong!',
