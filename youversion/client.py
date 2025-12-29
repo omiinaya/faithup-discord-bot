@@ -184,45 +184,62 @@ class YouVersionClient:
         return 1  # Default to first verse
     
     def _extract_verse_text(self, chapter_data: Dict[str, Any], verse_number: int) -> str:
-        """Extract specific verse text from chapter data.
-        
-        Args:
-            chapter_data: Bible chapter data from API
-            verse_number: Verse number to extract
-            
-        Returns:
-            Verse text
-            
-        Raises:
-            ValueError: If verse not found
-        """
+        """Extract specific verse text from chapter data."""
         # The API returns verses embedded in HTML content under response.data
         content = chapter_data.get("response", {}).get("data", {}).get("content", "")
         
         # Parse HTML to find the specific verse
-        # Look for span with class "verse v{number}" and extract text
         import re
         
-        # Pattern to find verse span with the specific verse number
-        pattern = rf'<span class="verse v{verse_number}"[^>]*>.*?<span class="wj"><span class="content">(.*?)</span></span>'
-        match = re.search(pattern, content, re.DOTALL)
+        # Look for the specific verse pattern in the HTML
+        # The structure is: <span class="verse v{number}" ...><span class="label">{number}</span><span class="content">text</span>...</span>
+        # Use a pattern that captures everything until the next verse starts
+        verse_pattern = rf'<span class="verse v{verse_number}"[^>]*>(.*?)(?=<span class="verse v|\Z)'
+        match = re.search(verse_pattern, content, re.DOTALL)
         
         if match:
-            verse_text = match.group(1).strip()
-            # Clean up any HTML entities or extra whitespace
-            verse_text = re.sub(r'\s+', ' ', verse_text)
-            return verse_text
+            verse_content = match.group(1).strip()
+            
+            # Extract all content spans within the verse
+            content_pattern = r'<span class="content">(.*?)</span>'
+            content_matches = re.findall(content_pattern, verse_content, re.DOTALL)
+            
+            if content_matches:
+                # Combine all content spans
+                verse_text = ''.join(content_matches)
+                # Clean up any remaining HTML tags and whitespace
+                verse_text = re.sub(r'<[^>]+>', '', verse_text)
+                verse_text = re.sub(r'\s+', ' ', verse_text).strip()
+                
+                if verse_text:
+                    return verse_text
         
-        # Fallback: try to find verse in any verse span
-        pattern_fallback = r'<span class="verse v\d+"[^>]*>.*?<span class="wj"><span class="content">(.*?)</span></span>'
-        matches = re.findall(pattern_fallback, content, re.DOTALL)
+        # Alternative pattern: look for verse content after the label
+        alt_pattern = rf'<span class="label">{verse_number}</span>.*?<span class="content">(.*?)</span>'
+        alt_match = re.search(alt_pattern, content, re.DOTALL)
         
-        if matches:
-            # Return first verse found as fallback
-            verse_text = matches[0].strip()
-            verse_text = re.sub(r'\s+', ' ', verse_text)
-            return verse_text
+        if alt_match:
+            verse_text = alt_match.group(1).strip()
+            verse_text = re.sub(r'<[^>]+>', '', verse_text)
+            verse_text = re.sub(r'\s+', ' ', verse_text).strip()
+            
+            if verse_text:
+                return verse_text
         
+        # Final fallback: extract all text within the verse span
+        fallback_pattern = rf'<span class="verse v{verse_number}"[^>]*>(.*?)</span>'
+        fallback_match = re.search(fallback_pattern, content, re.DOTALL)
+        
+        if fallback_match:
+            verse_content = fallback_match.group(1).strip()
+            # Remove all HTML tags but keep the text
+            verse_text = re.sub(r'<[^>]+>', '', verse_content)
+            verse_text = re.sub(r'\s+', ' ', verse_text).strip()
+            
+            if verse_text:
+                return verse_text
+        
+        # If nothing works, raise an error
         raise ValueError(f"Verse {verse_number} not found in chapter data")
     
     def _usfm_to_human(self, usfm_ref: str) -> str:

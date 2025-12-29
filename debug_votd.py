@@ -10,6 +10,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from youversion.client import YouVersionClient
 
+
 def debug_votd():
     """Debug the VOTD functionality step by step."""
     # Load environment variables
@@ -37,7 +38,7 @@ def debug_votd():
         # Test VOTD endpoint only
         print("\n📖 Testing VOTD endpoint only...")
         votd_raw = client.get_verse_of_the_day()
-        print(f"✅ VOTD data received:")
+        print("✅ VOTD data received:")
         print(f"   Day: {votd_raw.get('day')}")
         print(f"   USFM: {votd_raw.get('usfm')}")
         print(f"   Image ID: {votd_raw.get('image_id')}")
@@ -50,18 +51,22 @@ def debug_votd():
             
             # Test Bible chapter API
             chapter_data = client.get_verse_text(usfm_ref)
-            print(f"✅ Bible chapter data received:")
+            print("✅ Bible chapter data received:")
             print(f"   Keys: {list(chapter_data.keys())}")
             
-            # Try to extract verse text
-            if "verses" in chapter_data:
-                verses = chapter_data["verses"]
-                print(f"   Number of verses: {len(verses)}")
-                if verses:
-                    print(f"   First verse: {verses[0][:100]}...")
-            else:
-                print("❌ No 'verses' key found in response")
-                print(f"   Full response: {chapter_data}")
+            # Try to extract verse text using the client's method
+            try:
+                verse_number = client._extract_verse_number(usfm_ref)
+                print(f"   Extracted verse number: {verse_number}")
+                
+                verse_text = client._extract_verse_text(chapter_data, verse_number)
+                print("✅ Verse text extracted successfully:")
+                print(f"   Verse {verse_number}: {verse_text[:100]}...")
+                
+            except Exception as e:
+                print(f"❌ Error extracting verse text: {e}")
+                import traceback
+                traceback.print_exc()
                 
         else:
             print("❌ No USFM references found in VOTD data")
@@ -70,6 +75,7 @@ def debug_votd():
         print(f"❌ Debug failed: {e}")
         import traceback
         traceback.print_exc()
+
 
 if __name__ == "__main__":
     debug_votd()
