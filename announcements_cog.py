@@ -6,7 +6,7 @@ from typing import Dict
 from redbot.core import commands
 from redbot.core.bot import Red
 from redbot.core.config import Config
-from redbot.core.utils import tasks
+from discord.ext import tasks
 
 logger = logging.getLogger("red.cogfaithup.announcements")
 
