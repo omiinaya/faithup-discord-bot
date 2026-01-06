@@ -22,6 +22,11 @@ class MyCog(commands.Cog):
 
     def __init__(self, bot: commands.Bot):
         self.bot = bot
+        try:
+            self.youversion_client = YouVersionClient()
+        except ValueError as e:
+            logger.warning("Failed to initialize YouVersionClient: %s", e)
+            self.youversion_client = None
         logger.info("MyCog loaded and initialized.")
 
     @commands.command()
@@ -196,8 +201,9 @@ class MyCog(commands.Cog):
         logger.info("votd called by %s", ctx.author)
         
         try:
-            client = YouVersionClient()
-            verse_data = client.get_formatted_verse_of_the_day(day)
+            if self.youversion_client is None:
+                raise ValueError("YouVersion client is not available. Check environment variables.")
+            verse_data = self.youversion_client.get_formatted_verse_of_the_day(day)
             
             # Format the message
             message = (
