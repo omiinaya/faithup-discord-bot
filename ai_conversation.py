@@ -13,7 +13,7 @@ class AIConversationHandler:
     
     def __init__(self):
         self._client = None
-        self.model = "deepseek-ai/deepseek-v3.1-terminus"
+        self.model = "deepseek-ai/deepseek-v3.2"
         # user_id -> message history
         self.conversations: Dict[int, List[Dict[str, str]]] = {}
     

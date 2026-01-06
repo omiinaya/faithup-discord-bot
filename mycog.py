@@ -331,6 +331,41 @@ class MyCog(commands.Cog):
         await ctx.send(msg)
 
 
+    @commands.command()
+    async def dreaming(self, ctx: commands.Context) -> None:
+        """Check if you're dreaming using the spinning top from Inception."""
+        logger.info("dreaming called by %s", ctx.author)
+        
+        # Dramatic spinning top outcomes
+        outcomes = [
+            "🌀 The top spins endlessly... you are trapped in a dream!",
+            "💫 The top wobbles violently, then falls. This is reality.",
+            "🌪️ The top spins impossibly fast, defying physics - dream world confirmed!",
+            "🔄 The top spins perfectly balanced... but wait, it never slows down. You're dreaming!",
+            "⚖️ The top teeters on the edge, then settles. This is the real world.",
+            "🌌 The top spins into a vortex, creating a paradox. You're in a dream within a dream!",
+            "🛑 The top stops abruptly. Welcome back to reality.",
+            "🌀 The top spins counter-clockwise - a sure sign you're in someone else's dream!",
+            "💤 The top spins so slowly it seems frozen in time. Dream state confirmed.",
+            "🌅 The top catches the light and shimmers. Reality feels solid... but is it?",
+            "🌀 The top spins, creating ripples in the air. The dream is collapsing!",
+            "🔄 The top spins backwards - a glitch in the matrix. Definitely dreaming!",
+            "⚡ The top spins with electric energy. The dream is becoming unstable!",
+            "🌊 The top spins on water without sinking. You're in a shared dream!",
+            "🛑 The top falls over immediately. Solid reality confirmed."
+        ]
+        
+        # Add some suspense with typing indicator
+        async with ctx.typing():
+            # Simulate spinning time
+            import asyncio
+            await asyncio.sleep(2)
+            
+            # Select random outcome
+            outcome = random.choice(outcomes)
+            message = f"{ctx.author.mention} {outcome}"
+            await ctx.send(message)
+
 async def setup(bot: commands.Bot) -> None:
     """Setup function to add the cog to the bot."""
     await bot.add_cog(MyCog(bot))
