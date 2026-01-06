@@ -140,7 +140,7 @@ class MyCog(commands.Cog):
                 await ctx.send(t('roulette_survive', lang='en', outcome=outcome))
         except discord.DiscordException as e:
             logger.error("Error in roulette command: %s", e)
-            error_msg = t('roulette_error', lang='en', error=e)
+            error_msg = t('roulette_error', lang='en', error=str(e))
             await ctx.send(error_msg)
 
     @commands.command()
@@ -252,7 +252,7 @@ class MyCog(commands.Cog):
                 await message.channel.send(response)
                 
         except Exception as e:
-            logger.error(f"Error handling AI conversation: {e}")
+            logger.error("Error handling AI conversation: %s", e)
             await message.channel.send(
                 "Sorry, I encountered an error processing your message."
             )

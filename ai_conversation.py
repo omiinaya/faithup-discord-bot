@@ -16,6 +16,7 @@ class AIConversationHandler:
         self.model = "deepseek-ai/deepseek-v3.2"
         # user_id -> message history
         self.conversations: Dict[int, List[Dict[str, str]]] = {}
+        self.max_conversations = 1000
     
     @property
     def client(self):
@@ -33,6 +34,15 @@ class AIConversationHandler:
     def _get_conversation_history(self, user_id: int) -> List[Dict[str, str]]:
         """Get or create conversation history for a user."""
         if user_id not in self.conversations:
+            # Enforce maximum conversation limit
+            if len(self.conversations) >= self.max_conversations:
+                # Remove a random conversation to make space
+                random_key = next(iter(self.conversations))
+                del self.conversations[random_key]
+                logger.warning(
+                    "Reached maximum conversations limit (%s), removed conversation for user %s",
+                    self.max_conversations, random_key
+                )
             # Initialize with system message
             system_message = (
                 "You are a helpful AI assistant in a Discord server. "
@@ -100,7 +110,7 @@ class AIConversationHandler:
             
         except Exception as e:
             logger.error(
-                f"Error generating AI response for user {user_id}: {e}"
+                "Error generating AI response for user %s: %s", user_id, e
             )
             return (
                 "Sorry, I'm having trouble processing your message right now. "

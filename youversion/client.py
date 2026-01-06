@@ -22,6 +22,8 @@ class YouVersionClient:
         """Initialize the YouVersion client."""
         self.authenticator = YouVersionAuthenticator()
         self._session = requests.Session()
+        self._votd_cache = {}  # day -> (timestamp, data)
+        self._cache_ttl = 86400  # 24 hours in seconds
     
     def get_verse_of_the_day(self, day: Optional[int] = None) -> Dict[str, Any]:
         """Get the verse of the day.
@@ -117,7 +119,7 @@ class YouVersionClient:
             
             if response.status_code != 200:
                 # Log the response for debugging
-                print(f"API Response: {response.status_code} - {response.text}")
+                logger.debug("API Response: %s - %s", response.status_code, response.text)
                 raise ValueError(
                     f"Bible chapter API request failed: {response.status_code}"
                 )
@@ -139,6 +141,18 @@ class YouVersionClient:
         Raises:
             ValueError: If API requests fail
         """
+        import time
+        if day is None:
+            day = datetime.now().timetuple().tm_yday
+        
+        # Check cache
+        cached = self._votd_cache.get(day)
+        if cached:
+            timestamp, data = cached
+            if time.time() - timestamp < self._cache_ttl:
+                logger.debug("Returning cached VOTD for day %s", day)
+                return data
+        
         # Get the verse reference
         votd_data = self.get_verse_of_the_day(day)
         
@@ -157,7 +171,7 @@ class YouVersionClient:
         verse_number = self._extract_verse_number(usfm_ref)
         verse_text = self._extract_verse_text(chapter_data, verse_number)
         
-        return {
+        result = {
             "day": votd_data.get("day"),
             "usfm": usfm_ref,
             "human_reference": self._usfm_to_human(usfm_ref),
@@ -165,6 +179,12 @@ class YouVersionClient:
             "version_id": 1,  # Default to KJV
             "image_id": votd_data.get("image_id")
         }
+        
+        # Store in cache
+        self._votd_cache[day] = (time.time(), result)
+        logger.debug("Cached VOTD for day %s", day)
+        
+        return result
     
     def _extract_verse_number(self, usfm_ref: str) -> int:
         """Extract verse number from USFM reference.

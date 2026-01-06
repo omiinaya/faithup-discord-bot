@@ -34,7 +34,7 @@ class MyCog(commands.Cog):
             return
         try:
             response = requests.get(api_url, timeout=10)
-            logger.info(f"API call to {api_url} returned status {response.status_code}")
+            logger.info("API call to %s returned status %s", api_url, response.status_code)
             if response.status_code == 200:
                 content_type = response.headers.get('Content-Type', '')
                 if 'application/json' in content_type:
@@ -50,7 +50,7 @@ class MyCog(commands.Cog):
             else:
                 await ctx.send(f"Failed to retrieve data from the API. Status: {response.status_code}")
         except Exception as e:
-            logger.error(f"API call failed: {e}")
+            logger.error("API call failed: %s", e)
             await ctx.send(f"API call failed: {e}")
 
 def setup(bot):

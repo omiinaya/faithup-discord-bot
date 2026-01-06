@@ -84,7 +84,7 @@ class AnnouncementsCog(commands.Cog):
         except ValueError:
             await ctx.send("Invalid time format. Use HH:MM (24-hour).")
         except Exception as e:
-            logger.error(f"Error adding announcement: {e}")
+            logger.error("Error adding announcement: %s", e)
             await ctx.send("Error adding announcement.")
 
     @announcement_group.command(name="list")
@@ -199,7 +199,7 @@ class AnnouncementsCog(commands.Cog):
         except discord.Forbidden:
             await ctx.send("❌ No permission to send messages in that channel.")
         except Exception as e:
-            logger.error(f"Error testing announcement: {e}")
+            logger.error("Error testing announcement: %s", e)
             await ctx.send("❌ Error sending test announcement.")
 
     @tasks.loop(minutes=1.0)
