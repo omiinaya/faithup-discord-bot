@@ -306,8 +306,8 @@ class MyCog(commands.Cog):
             
         await ctx.send(message)
 
-    @commands.command()
-    async def commands(self, ctx: commands.Context, lang: str = 'en') -> None:
+    @commands.command(name="commands")
+    async def list_commands(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Lists all available commands and their descriptions."""
         logger.info("commands called by %s", ctx.author)
         cmds = [
