@@ -1,9 +1,10 @@
-import requests
 import os
 from dotenv import load_dotenv
 from redbot.core import commands
 import logging
 from typing import Optional
+
+from async_http_client import aget
 
 # Load environment variables from .env file
 load_dotenv()
@@ -33,7 +34,7 @@ class MyCog(commands.Cog):
             await ctx.send("API URL not configured or invalid. Please set SAMPLE_API in your .env file or provide a valid URL.")
             return
         try:
-            response = requests.get(api_url, timeout=10)
+            response = await aget(api_url, timeout=10)
             logger.info("API call to %s returned status %s", api_url, response.status_code)
             if response.status_code == 200:
                 content_type = response.headers.get('Content-Type', '')

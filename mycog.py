@@ -16,6 +16,13 @@ from .ai_conversation import ai_handler
 load_dotenv()
 logger = logging.getLogger("red.cogfaithup.mycog")
 
+BINGBONG_RESPONSES = (
+    t('bingbong_positive', lang='en') +
+    t('bingbong_negative', lang='en') +
+    t('bingbong_uncertain', lang='en') +
+    t('bingbong_irrelevant', lang='en')
+)
+
 
 class MyCog(commands.Cog):
     """My custom cog with fun commands and best practices."""
@@ -291,14 +298,8 @@ class MyCog(commands.Cog):
         logger.debug("bingbong called by %s with question: %s",
                     ctx.author, question)
         
-        # Get all response lists
-        positive = t('bingbong_positive', lang='en')
-        negative = t('bingbong_negative', lang='en')
-        uncertain = t('bingbong_uncertain', lang='en')
-        irrelevant = t('bingbong_irrelevant', lang='en')
-        
-        # Combine all response types
-        all_responses = positive + negative + uncertain + irrelevant
+        # Use precomputed response list
+        all_responses = BINGBONG_RESPONSES
         
         # Select a random response
         response = random.choice(all_responses)

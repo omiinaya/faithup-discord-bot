@@ -120,7 +120,9 @@ CONTENT_PATTERN = re.compile(r'<span class="content">(.*?)</span>', re.DOTALL)
 ### 7.1 Parallelize API Calls
 **Issue:** `get_formatted_verse_of_the_day` makes two sequential API calls (VOTD + chapter). These could be parallelized.
 
-**Suggestion:** Use `asyncio.gather` if migrating to async HTTP clients.
+**Implementation:** The `YouVersionClient` now includes a `get_verse_texts` method that fetches multiple USFM references concurrently using `asyncio.gather`. The `get_formatted_verse_of_the_day` method attempts to fetch all USFM references in parallel, falling back to sequential if parallel fetch fails. This reduces latency when multiple references are available.
+
+**Status:** Implemented (see `youversion/client.py`).
 
 ### 7.2 Background Processing for Heavy Tasks
 **Issue:** Regex parsing and AI response generation happen in the event loop.
@@ -133,6 +135,14 @@ CONTENT_PATTERN = re.compile(r'<span class="content">(.*?)</span>', re.DOTALL)
 **Issue:** No rate limiting on AI conversation or YouVersion API beyond Discord cooldowns.
 
 **Suggestion:** Implement per‑user rate limiting for expensive operations (AI calls) to prevent abuse.
+
+**Implementation:** A generic `RateLimiter` class has been added (`rate_limiter.py`) using a sliding window algorithm. It supports both blocking and non‑blocking modes. Rate limiters are integrated into `YouVersionClient` (for YouVersion API) and `AIConversationHandler` (for NVIDIA API). Limits are configurable via environment variables:
+- `YOUVERSION_MAX_CALLS` / `YOUVERSION_PERIOD`
+- `NVIDIA_MAX_CALLS` / `NVIDIA_PERIOD`
+
+Default values are conservative (30 calls per minute for YouVersion, 10 calls per minute for NVIDIA). The rate limiter ensures API quotas are respected and improves reliability.
+
+**Status:** Implemented.
 
 ### 8.2 Input Sanitization
 **Issue:** User input is passed directly to the AI model and regex patterns; potential for injection attacks is low but present.
@@ -152,7 +162,7 @@ CONTENT_PATTERN = re.compile(r'<span class="content">(.*?)</span>', re.DOTALL)
 
 ## Next Steps
 
-1. **Immediate wins:** Implement session reuse and async HTTP for YouVersion client.
+1. **Immediate wins:** Implement session reuse and async HTTP for YouVersion client (async HTTP already used). Parallel API calls have been implemented.
 2. **Medium term:** Add retry logic and improve caching.
 3. **Long term:** Migrate to async OpenAI client and add monitoring.
 

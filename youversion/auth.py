@@ -3,21 +3,27 @@
 import base64
 import os
 import time
-from typing import Optional, Tuple
+from typing import Optional
 
-import requests
+import httpx
 from dotenv import load_dotenv
+from ..async_http_client import apost
 
 # Load environment variables
 load_dotenv()
+
 
 class YouVersionAuthenticator:
     """Handles authentication for YouVersion API using OAuth2."""
     
     # API Configuration
     AUTH_URL = "https://auth.youversionapi.com/token"
-    CLIENT_ID = base64.b64decode("ODViNjFkOTdhNzliOTZiZTQ2NWViYWVlZTgzYjEzMTM=").decode()
-    CLIENT_SECRET = base64.b64decode("NzVjZjBlMTQxY2JmNDFlZjQxMGFkY2U1YjY1MzdhNDk=").decode()
+    CLIENT_ID = base64.b64decode(
+        "ODViNjFkOTdhNzliOTZiZTQ2NWViYWVlZTgzYjEzMTM="
+    ).decode()
+    CLIENT_SECRET = base64.b64decode(
+        "NzVjZjBlMTQxY2JmNDFlZjQxMGFkY2U1YjY1MzdhNDk="
+    ).decode()
     
     # Default headers for API requests
     DEFAULT_HEADERS = {
@@ -41,7 +47,7 @@ class YouVersionAuthenticator:
                 "variables must be set. Create a .env file with these values."
             )
     
-    def get_access_token(self) -> str:
+    async def get_access_token(self) -> str:
         """Get a valid access token, refreshing if necessary.
         
         Returns:
@@ -53,7 +59,7 @@ class YouVersionAuthenticator:
         if self._is_token_valid():
             return self._access_token
         
-        return self._authenticate()
+        return await self._authenticate()
     
     def _is_token_valid(self) -> bool:
         """Check if the current token is still valid.
@@ -67,7 +73,7 @@ class YouVersionAuthenticator:
         # Add a 60-second buffer to avoid using tokens that are about to expire
         return time.time() < (self._token_expiry - 60)
     
-    def _authenticate(self) -> str:
+    async def _authenticate(self) -> str:
         """Authenticate with YouVersion API and get access token.
         
         Returns:
@@ -77,7 +83,7 @@ class YouVersionAuthenticator:
             ValueError: If authentication fails
         """
         try:
-            response = requests.post(
+            response = await apost(
                 self.AUTH_URL,
                 data={
                     "client_id": self.CLIENT_ID,
@@ -87,12 +93,13 @@ class YouVersionAuthenticator:
                     "password": self.password,
                 },
                 headers=self.DEFAULT_HEADERS,
-                timeout=30
+                timeout=10
             )
             
             if response.status_code != 200:
                 raise ValueError(
-                    f"Authentication failed: {response.status_code} - {response.text}"
+                    f"Authentication failed: {response.status_code} - "
+                    f"{response.text}"
                 )
             
             token_data = response.json()
@@ -107,7 +114,7 @@ class YouVersionAuthenticator:
             
             return self._access_token
             
-        except requests.exceptions.RequestException as e:
+        except httpx.RequestError as e:
             raise ValueError(f"Authentication request failed: {e}")
     
     def _extract_user_info(self, token: str) -> None:
@@ -142,13 +149,13 @@ class YouVersionAuthenticator:
             # If extraction fails, continue without user_id
             pass
     
-    def get_auth_headers(self) -> dict:
+    async def get_auth_headers(self) -> dict:
         """Get headers with authentication for API requests.
         
         Returns:
             Dictionary with authentication headers
         """
-        token = self.get_access_token()
+        token = await self.get_access_token()
         return {
             **self.DEFAULT_HEADERS,
             "Authorization": f"Bearer {token}"
