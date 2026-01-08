@@ -33,7 +33,7 @@ class MyCog(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def roll(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Roll a random number from 1-100."""
-        logger.info("roll called by %s", ctx.author)
+        logger.debug("roll called by %s", ctx.author)
         random_number = random.randint(1, 100)
         message = t('roll', lang=lang, user=ctx.author.mention,
                     number=random_number)
@@ -43,7 +43,7 @@ class MyCog(commands.Cog):
     @commands.cooldown(1, 5, commands.BucketType.user)
     async def dice(self, ctx: commands.Context) -> None:
         """Roll a random number from 1-6. (5s cooldown per user)"""
-        logger.info("dice called by %s", ctx.author)
+        logger.debug("dice called by %s", ctx.author)
         random_number = random.randint(1, 6)
         message = f"{ctx.author.mention}, you rolled a {random_number}"
         await ctx.send(message)
@@ -53,7 +53,7 @@ class MyCog(commands.Cog):
     async def rps(self, ctx: commands.Context,
                   opponent: commands.MemberConverter) -> None:
         """Play Rock-Paper-Scissors against another player."""
-        logger.info("rps called by %s vs %s", ctx.author, opponent)
+        logger.debug("rps called by %s vs %s", ctx.author, opponent)
         try:
             valid, error = is_valid_member(ctx, opponent)
             if not valid:
@@ -103,7 +103,7 @@ class MyCog(commands.Cog):
     async def secret(self, ctx: commands.Context,
                      target: commands.MemberConverter, *, message: str) -> None:
         """Sends a secret message to the specified user."""
-        logger.info("secret called by %s targeting %s with message: %s",
+        logger.debug("secret called by %s targeting %s with message: %s",
                     ctx.author, target, message)
         try:
             # Allow sending messages to self for testing
@@ -135,7 +135,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def roulette(self, ctx: commands.Context) -> None:
         """Play text-based Russian roulette."""
-        logger.info("roulette called by %s",
+        logger.debug("roulette called by %s",
                     ctx.author)
         try:
             outcome = random.randint(1, 6)
@@ -151,7 +151,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def slots(self, ctx: commands.Context) -> None:
         """Play a slot machine game with Discord emojis."""
-        logger.info("slots called by %s",
+        logger.debug("slots called by %s",
                     ctx.author)
         emojis = [":cherries:", ":lemon:", ":strawberry:",
                   ":grapes:", ":seven:", ":bell:"]
@@ -168,7 +168,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def coinflip(self, ctx: commands.Context) -> None:
         """Flip a coin and return heads or tails."""
-        logger.info("coinflip called by %s", ctx.author)
+        logger.debug("coinflip called by %s", ctx.author)
         outcome = random.choice(['heads', 'tails'])
         message = f"{ctx.author.mention}, the coin landed on {outcome}!"
         await ctx.send(message)
@@ -176,7 +176,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def decide(self, ctx: commands.Context) -> None:
         """Randomly decide yes or no."""
-        logger.info("decide called by %s", ctx.author)
+        logger.debug("decide called by %s", ctx.author)
         if random.random() < 0.5:
             result = t('decide_yes', lang='en')
         else:
@@ -186,7 +186,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def balding(self, ctx: commands.Context) -> None:
         """Returns a random balding percentage."""
-        logger.info("balding called by %s", ctx.author)
+        logger.debug("balding called by %s", ctx.author)
         percent = random.randint(0, 100)
         if percent == 0:
             message = t('balding_none', lang='en')
@@ -198,12 +198,12 @@ class MyCog(commands.Cog):
     @commands.command()
     async def votd(self, ctx: commands.Context, day: Optional[int] = None) -> None:
         """Get the Verse of the Day from YouVersion."""
-        logger.info("votd called by %s", ctx.author)
+        logger.debug("votd called by %s", ctx.author)
         
         try:
             if self.youversion_client is None:
                 raise ValueError("YouVersion client is not available. Check environment variables.")
-            verse_data = self.youversion_client.get_formatted_verse_of_the_day(day)
+            verse_data = await self.youversion_client.get_formatted_verse_of_the_day(day)
             
             # Format the message
             message = (
@@ -266,8 +266,8 @@ class MyCog(commands.Cog):
     @commands.command()
     async def clear_chat(self, ctx: commands.Context) -> None:
         """Clear your conversation history with the AI."""
-        logger.info("clear_chat called by %s", ctx.author)
-        if ai_handler.clear_conversation(ctx.author.id):
+        logger.debug("clear_chat called by %s", ctx.author)
+        if await ai_handler.clear_conversation(ctx.author.id):
             await ctx.send(
                 f"{ctx.author.mention}, your conversation history has been cleared."
             )
@@ -279,7 +279,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def source(self, ctx: commands.Context) -> None:
         """Returns the GitHub source code link."""
-        logger.info("source called by %s", ctx.author)
+        logger.debug("source called by %s", ctx.author)
         message = (f"{ctx.author.mention}, here's the source code: "
                    "https://github.com/omiinaya/faithup-discord-bot")
         await ctx.send(message)
@@ -288,7 +288,7 @@ class MyCog(commands.Cog):
     async def bingbong(self, ctx: commands.Context,
                        *, question: Optional[str] = None) -> None:
         """Ask Bing Bong a question and get a random response."""
-        logger.info("bingbong called by %s with question: %s",
+        logger.debug("bingbong called by %s with question: %s",
                     ctx.author, question)
         
         # Get all response lists
@@ -315,7 +315,7 @@ class MyCog(commands.Cog):
     @commands.command(name="commands")
     async def list_commands(self, ctx: commands.Context, lang: str = 'en') -> None:
         """Lists all available commands and their descriptions."""
-        logger.info("commands called by %s", ctx.author)
+        logger.debug("commands called by %s", ctx.author)
         cmds = [
             ("roll", t('desc_roll', lang=lang)),
             ("dice", t('desc_dice', lang=lang)),
@@ -340,7 +340,7 @@ class MyCog(commands.Cog):
     @commands.command()
     async def dreaming(self, ctx: commands.Context) -> None:
         """Check if you're dreaming using the spinning top from Inception."""
-        logger.info("dreaming called by %s", ctx.author)
+        logger.debug("dreaming called by %s", ctx.author)
         
         # Dramatic spinning top outcomes
         outcomes = [
