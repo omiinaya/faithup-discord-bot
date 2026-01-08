@@ -6,7 +6,7 @@ import time
 import random
 from typing import Dict, List
 from openai import AsyncOpenAI
-from rate_limiter import get_limiter_from_env
+from .rate_limiter import get_limiter_from_env
 
 logger = logging.getLogger("red.cogfaithup.ai_conversation")
 
